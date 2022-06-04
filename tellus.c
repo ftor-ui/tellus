@@ -5,12 +5,12 @@
 #include "Include/server.h"
 #include "Include/client.h"
 
+static int mode = -1; // 0 - client, 1 - server, -1 - not specified
+static char ip_addr[16] = {0}; // ip-address of host to connection (16 is a max string-length of IPv4 address)
+static short int port = 0;
+
 int main(const int argc, const char **argv)
 {
-	int mode = -1; // 0 - client, 1 - server, -1 - not specified
-	char ip_addr[16] = {0}; // ip-address of host to connection (16 is a max string-length of IPv4 address)
-	short int port = 0;
-
 	printf("Running Tellus (ZARYA-software)\n\n");
 
 	// Checking number of arguments

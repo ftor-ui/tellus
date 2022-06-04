@@ -1,1 +1,1 @@
-gcc tellus.c client.c server.c -o tellus
+gcc tellus.c client.c server.c -lpthread -o tellus
