@@ -26,6 +26,10 @@ static void *SendT();
 void client(char *ip_addr, short int port)
 {
         sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock == -1) {
+		printf("[-] Socket error!\n");
+		return;
+	}
 
 	server_addr.sin_family = AF_INET;
 	inet_pton(AF_INET, ip_addr, (void *) &server_addr.sin_addr);

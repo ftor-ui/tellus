@@ -25,15 +25,30 @@ static void *SendT();
 void server(short int port)
 {
 	server_sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (server_sock == -1) {
+		printf("[-] Socket error!\n");
+		return;
+	}
 
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(port);
 
-	bind(server_sock, (struct sockaddr*) &server_addr, addr_len);
+	if (bind(server_sock, (struct sockaddr*) &server_addr, addr_len) == -1) {
+		printf("[-] Bind error!\n");
+		return;
+	}
 
-	listen(server_sock, 1);
-
+	if (listen(server_sock, 1) == -1) {
+		printf("[-] Listen error!\n");
+		return;
+	}
+	
 	client_sock = accept(server_sock, (struct sockaddr*) &server_addr, &addr_len);
+
+	if (client_sock == -1) {
+		printf("[-] Accept error!");
+		return;
+	}
 
 	printf("[+] Client conected\n\n");
 
