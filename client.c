@@ -19,29 +19,48 @@ static socklen_t addr_len = sizeof(server_addr);
 static pthread_t receive_thread = 0;
 static pthread_t send_thread = 0;
 
+static void client_init(char *ip_addr, short int port);
+static void client_connect();
+static void start_io();
+
 // Prefix 'T' mean that this function will be used of new thread
 static void *ReceiveT();
 static void *SendT();
 
 void client(char *ip_addr, short int port)
 {
-        sock = socket(AF_INET, SOCK_STREAM, 0);
+	client_init(ip_addr, port);
+
+	client_connect();	
+	
+	start_io();	
+}
+
+static void client_init(char *ip_addr, short int port)
+{
+	sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock == -1) {
 		printf("[-] Socket error!\n");
-		return;
+		exit(EXIT_FAILURE);
 	}
 
 	server_addr.sin_family = AF_INET;
 	inet_pton(AF_INET, ip_addr, (void *) &server_addr.sin_addr);
 	server_addr.sin_port = htons(port);
-	
+}
+
+static void client_connect()
+{
 	if (connect(sock, (const struct sockaddr *) &server_addr, addr_len) == -1) {
 		printf("[-] Connection failure!\n");
 		exit(EXIT_FAILURE);
 	}
 
 	printf("[+] You connected to server\n\n");
+}
 
+static void start_io()
+{
 	pthread_create(&receive_thread, NULL, &ReceiveT, NULL);
 	pthread_create(&send_thread, NULL, &SendT, NULL);
 

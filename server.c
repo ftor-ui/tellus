@@ -1,6 +1,7 @@
 #include "Include/server.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <sys/types.h>
@@ -18,16 +19,29 @@ static int client_sock = -1;
 static pthread_t receive_thread = 0;
 static pthread_t send_thread = 0;
 
+static void server_init(short int port);
+static void server_wait();
+static void start_io();
+
 // Prefix 'T' mean that this function will be used of new thread
 static void *ReceiveT();
 static void *SendT();
 
 void server(short int port)
 {
+	server_init(port);	
+	
+	server_wait();
+
+	start_io();
+}
+
+static void server_init(short int port)
+{
 	server_sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_sock == -1) {
 		printf("[-] Socket error!\n");
-		return;
+		exit(EXIT_FAILURE);
 	}
 
 	server_addr.sin_family = AF_INET;
@@ -35,29 +49,35 @@ void server(short int port)
 
 	if (bind(server_sock, (struct sockaddr*) &server_addr, addr_len) == -1) {
 		printf("[-] Bind error!\n");
-		return;
+		exit(EXIT_FAILURE);
 	}
 
 	if (listen(server_sock, 1) == -1) {
 		printf("[-] Listen error!\n");
-		return;
+		exit(EXIT_FAILURE);
 	}
-	
+}
+
+static void server_wait()
+{
 	client_sock = accept(server_sock, (struct sockaddr*) &server_addr, &addr_len);
 
 	if (client_sock == -1) {
 		printf("[-] Accept error!");
-		return;
+		exit(EXIT_FAILURE);
 	}
 
 	printf("[+] Client conected\n\n");
+}
 
+static void start_io()
+{
 	pthread_create(&receive_thread, NULL, &ReceiveT, NULL);
 	pthread_create(&send_thread, NULL, &SendT, NULL);
 
 	pthread_join(receive_thread, NULL);
 	pthread_join(send_thread, NULL);
-		
+
 	close(client_sock);
 	close(server_sock);
 }
