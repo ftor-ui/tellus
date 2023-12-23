@@ -67,8 +67,7 @@ static void start_io()
 {
 	pthread_create(&ParamsT.receive_thread, NULL, &ReceiveT, (void *)&ParamsT);
 	pthread_create(&ParamsT.send_thread, NULL, &SendT, (void *)&ParamsT);
-	
-	pthread_join(ParamsT.receive_thread, NULL);
+
 	pthread_join(ParamsT.send_thread, NULL);
 
 	closesocket(ParamsT.sock);

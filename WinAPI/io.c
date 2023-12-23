@@ -7,6 +7,8 @@
 
 void *ReceiveT(void *ParamsT)
 {
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+
 	char message[1024] = {0};
 	int message_len = 0;
 
@@ -23,17 +25,19 @@ void *ReceiveT(void *ParamsT)
 		write(STDOUT_FILENO, "\n> ", 3);
 	}
 
-	write(STDOUT_FILENO, "\n[-] Other side disconnected\n", 29);
+	write(STDOUT_FILENO, "\n[-] Other side disconnected. Press any key...\n", 47);
 
 	pthread_cancel(((struct _ParamsT*)ParamsT)->send_thread);
 }
 
 void *SendT(void *ParamsT)
 {
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+
 	char message[1024] = {0};
 	size_t message_len = 0;
 
-	while (strcmp("/exit", message)) {
+	do {
 		write(STDOUT_FILENO, "\n> ", 3);
 
 		message_len = 0;
@@ -50,7 +54,8 @@ void *SendT(void *ParamsT)
 
 		encode_by_key(message,message_len,((struct _ParamsT*)ParamsT)->enkey,((struct _ParamsT*)ParamsT)->enkey_len);
 		send(((struct _ParamsT*)ParamsT)->sock, message, message_len, 0);
-	}
+		encode_by_key(message,message_len,((struct _ParamsT*)ParamsT)->enkey,((struct _ParamsT*)ParamsT)->enkey_len);
+	} while (strcmp("/exit", message)); 
 
 	pthread_cancel(((struct _ParamsT*)ParamsT)->receive_thread);
 }
